@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1737844101537,
+      "tag": "0000_many_betty_ross",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1738204685005,
+      "tag": "0001_remarkable_nightshade",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1738234316391,
+      "tag": "0002_gifted_amazoness",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1738445687953,
+      "tag": "0003_chubby_stingray",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1739304973656,
+      "tag": "0004_lean_paper_doll",
+      "breakpoints": true
+    }
+  ]
+}

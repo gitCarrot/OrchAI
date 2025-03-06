@@ -1,0 +1,2 @@
+ALTER TABLE "recipes" ADD COLUMN "embedding" vector(1536) DEFAULT ARRAY_FILL(0, ARRAY[1536]) NOT NULL;--> statement-breakpoint
+CREATE INDEX "ingredients_refrigerator_category_id_idx" ON "ingredients" USING btree ("refrigerator_category_id");

@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# .env 파일이 스테이징 영역에 있는지 확인
+if git diff --cached --name-only | grep -q ".env$"; then
+  echo "Error: .env 파일을 커밋하려고 합니다. 이 파일에는 민감한 정보가 포함되어 있을 수 있습니다."
+  echo "커밋을 취소합니다. .env 파일을 스테이징 영역에서 제거하려면 다음 명령어를 실행하세요:"
+  echo "  git reset .env"
+  exit 1
+fi
+
+# API 키와 같은 민감한 정보가 포함된 파일이 있는지 확인
+if git diff --cached -G"(OPENAI_API_KEY|CLERK_SECRET_KEY|SUPABASE_ANON_KEY)=[a-zA-Z0-9_-]+" --name-only | grep -v ".env.example"; then
+  echo "Warning: 커밋하려는 파일에 API 키와 같은 민감한 정보가 포함되어 있을 수 있습니다."
+  echo "다음 파일을 확인하세요:"
+  git diff --cached -G"(OPENAI_API_KEY|CLERK_SECRET_KEY|SUPABASE_ANON_KEY)=[a-zA-Z0-9_-]+" --name-only | grep -v ".env.example"
+  
+  # 사용자에게 계속 진행할지 물어봄
+  echo "계속 진행하시겠습니까? (y/n)"
+  read answer
+  if [ "$answer" != "y" ]; then
+    echo "커밋이 취소되었습니다."
+    exit 1
+  fi
+fi
+
+# 모든 검사를 통과하면 커밋 진행
+exit 0 

@@ -1,0 +1,102 @@
+{
+  "common": {
+    "error": "오류가 발생했습니다",
+    "loading": "로딩 중...",
+    "userNotFound": "사용자를 찾을 수 없습니다",
+    "all": "전체",
+    "unknownError": "알 수 없는 오류가 발생했습니다"
+  },
+  "refrigerator": {
+    "loadError": "데이터를 불러오는 중 오류가 발생했습니다",
+    "addIngredient": "재료 추가",
+    "addIngredientDesc": "냉장고에 새로운 재료를 추가합니다",
+    "share": {
+      "title": "냉장고 공유",
+      "description": "이메일을 입력하여 다른 사용자와 냉장고를 공유하세요",
+      "emailLabel": "이메일 주소",
+      "emailPlaceholder": "사용자 이메일",
+      "roleLabel": "권한",
+      "selectRole": "권한 선택",
+      "roleViewer": "조회자 (보기만 가능)",
+      "roleAdmin": "관리자 (편집 가능)",
+      "submit": "공유하기",
+      "success": "공유 완료",
+      "successDesc": "사용자와 냉장고가 공유되었습니다",
+      "error": "공유 실패",
+      "errorDesc": "냉장고 공유 중 오류가 발생했습니다",
+      "alreadyShared": "이미 공유된 사용자입니다"
+    },
+    "category": {
+      "title": "카테고리 관리",
+      "manageDescription": "냉장고의 재료 카테고리를 관리할 수 있습니다",
+      "add": "카테고리 추가",
+      "edit": "카테고리 수정",
+      "delete": "카테고리 삭제",
+      "success": "카테고리 변경 완료",
+      "error": "카테고리 변경 실패"
+    },
+    "invitations": {
+      "title": "냉장고 초대 관리",
+      "description": "받은 초대와 보낸 초대를 관리할 수 있습니다",
+      "receivedTab": "받은 초대",
+      "sentTab": "보낸 초대",
+      "noReceived": "받은 초대 없음",
+      "noReceivedDesc": "아직 받은 초대가 없습니다",
+      "noSent": "보낸 초대 없음",
+      "noSentDesc": "아직 보낸 초대가 없습니다",
+      "from": "보낸 사람:",
+      "to": "받는 사람:",
+      "invitedOn": "초대일:",
+      "role": "권한",
+      "accept": "수락",
+      "reject": "거절",
+      "cancel": "초대 취소",
+      "statusPending": "대기 중",
+      "statusAccepted": "수락됨",
+      "statusRejected": "거절됨",
+      "loadError": "초대 목록을 불러오는 중 오류가 발생했습니다",
+      "processError": "초대 처리 중 오류가 발생했습니다",
+      "acceptSuccess": "초대 수락 완료",
+      "acceptSuccessDesc": "이제 냉장고에 접근할 수 있습니다",
+      "rejectSuccess": "초대 거절 완료",
+      "rejectSuccessDesc": "초대를 거절했습니다",
+      "cancelSuccess": "초대 취소 완료",
+      "cancelSuccessDesc": "초대가 취소되었습니다",
+      "cancelError": "초대 취소 중 오류가 발생했습니다"
+    },
+    "members": {
+      "title": "공유 멤버 관리",
+      "description": "냉장고를 공유한 멤버들을 관리할 수 있습니다",
+      "noMembers": "공유된 멤버가 없습니다",
+      "email": "이메일",
+      "remove": "삭제",
+      "removeSuccess": "멤버 삭제 완료",
+      "removeSuccessDesc": "멤버가 삭제되었습니다",
+      "removeError": "멤버 삭제 실패",
+      "removeErrorDesc": "멤버 삭제 중 오류가 발생했습니다"
+    },
+    "edit": {
+      "title": "냉장고 수정",
+      "description": "냉장고 정보를 수정할 수 있습니다",
+      "name": "이름",
+      "desc": "설명",
+      "submit": "수정하기",
+      "success": "수정 완료",
+      "successDesc": "냉장고 정보가 수정되었습니다",
+      "error": "수정 실패",
+      "errorDesc": "냉장고 수정 중 오류가 발생했습니다"
+    }
+  },
+  "recipe": {
+    "generator": {
+      "title": "AI 레시피 생성",
+      "placeholder": "레시피 내용을 자유롭게 입력해주세요. 예시) 돼지고기 김치찌개 만드는 방법 알려줘",
+      "button": "AI로 레시피 생성하기",
+      "loading": "AI가 레시피 생성 중...",
+      "success": "레시피가 생성되었습니다.",
+      "successDesc": "새로운 레시피가 성공적으로 생성되었습니다.",
+      "error": "오류",
+      "errorDesc": "레시피 생성 중 오류가 발생했습니다."
+    }
+  }
+} 

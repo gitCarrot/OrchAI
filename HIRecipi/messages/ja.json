@@ -1,0 +1,48 @@
+{
+  "common": {
+    "edit": "編集",
+    "editing": "編集中...",
+    "cancel": "キャンセル",
+    "error": "エラーが発生しました",
+    "loading": "読み込み中...",
+    "units": {
+      "g": "g",
+      "kg": "kg",
+      "ml": "ml",
+      "l": "l",
+      "個": "個",
+      "パック": "パック",
+      "箱": "箱",
+      "本": "本"
+    }
+  },
+  "recipe": {
+    "loading": {
+      "generating": "AIがレシピを生成中...",
+      "translating": "多言語でレシピを変換中...",
+      "saving": "レシピを生成して保存中..."
+    },
+    "generator": {
+      "multilingualTitle": "AIレシピジェネレーター",
+      "multilingualPlaceholder": "作りたい料理や材料を入力してください...",
+      "multilingualButton": "レシピを生成",
+      "error": "レシピ生成失敗",
+      "errorDesc": "レシピの生成中にエラーが発生しました。もう一度お試しください。",
+      "success": "レシピ生成完了",
+      "successDesc": "レシピが正常に生成されました。"
+    },
+    "error": {
+      "search": "レシピの検索中にエラーが発生しました。",
+      "favorite": "お気に入りの更新中にエラーが発生しました。"
+    },
+    "typeAI": "AI生成",
+    "typeCustom": "ユーザー作成",
+    "noTitle": "タイトルなし",
+    "favorited": "お気に入りに追加",
+    "favoritedDesc": "レシピがお気に入りに追加されました。",
+    "unfavorited": "お気に入りから削除",
+    "unfavoritedDesc": "レシピがお気に入りから削除されました。",
+    "deleted": "レシピ削除完了",
+    "deletedDesc": "レシピが正常に削除されました。"
+  }
+} 

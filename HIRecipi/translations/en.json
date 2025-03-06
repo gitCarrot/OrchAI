@@ -1,0 +1,102 @@
+{
+  "common": {
+    "error": "An error occurred",
+    "loading": "Loading...",
+    "userNotFound": "User not found",
+    "all": "All",
+    "unknownError": "An unknown error occurred"
+  },
+  "refrigerator": {
+    "loadError": "Failed to load data",
+    "addIngredient": "Add Ingredient",
+    "addIngredientDesc": "Add a new ingredient to your refrigerator",
+    "share": {
+      "title": "Share Refrigerator",
+      "description": "Enter an email to share your refrigerator with other users",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "User email",
+      "roleLabel": "Role",
+      "selectRole": "Select Role",
+      "roleViewer": "Viewer (View only)",
+      "roleAdmin": "Admin (Can edit)",
+      "submit": "Share",
+      "success": "Shared Successfully",
+      "successDesc": "Refrigerator has been shared with the user",
+      "error": "Share Failed",
+      "errorDesc": "Failed to share refrigerator",
+      "alreadyShared": "Already shared with this user"
+    },
+    "category": {
+      "title": "Category Management",
+      "manageDescription": "Manage ingredient categories for your refrigerator",
+      "add": "Add Category",
+      "edit": "Edit Category",
+      "delete": "Delete Category",
+      "success": "Category Updated",
+      "error": "Category Update Failed"
+    },
+    "invitations": {
+      "title": "Manage Refrigerator Invitations",
+      "description": "Manage your received and sent invitations",
+      "receivedTab": "Received Invitations",
+      "sentTab": "Sent Invitations",
+      "noReceived": "No Invitations",
+      "noReceivedDesc": "You haven't received any invitations yet",
+      "noSent": "No Sent Invitations",
+      "noSentDesc": "You haven't sent any invitations yet",
+      "from": "From:",
+      "to": "To:",
+      "invitedOn": "Invited on:",
+      "role": "Role",
+      "accept": "Accept",
+      "reject": "Reject",
+      "cancel": "Cancel Invitation",
+      "statusPending": "Pending",
+      "statusAccepted": "Accepted",
+      "statusRejected": "Rejected",
+      "loadError": "Failed to load invitations",
+      "processError": "Failed to process invitation",
+      "acceptSuccess": "Invitation Accepted",
+      "acceptSuccessDesc": "You now have access to the refrigerator",
+      "rejectSuccess": "Invitation Rejected",
+      "rejectSuccessDesc": "You have rejected the invitation",
+      "cancelSuccess": "Invitation Cancelled",
+      "cancelSuccessDesc": "The invitation has been cancelled",
+      "cancelError": "Failed to cancel invitation"
+    },
+    "members": {
+      "title": "Manage Shared Members",
+      "description": "Manage members who have access to this refrigerator",
+      "noMembers": "No shared members",
+      "email": "Email",
+      "remove": "Remove",
+      "removeSuccess": "Member Removed",
+      "removeSuccessDesc": "The member has been removed",
+      "removeError": "Remove Failed",
+      "removeErrorDesc": "An error occurred while removing the member"
+    },
+    "edit": {
+      "title": "Edit Refrigerator",
+      "description": "Edit refrigerator information",
+      "name": "Name",
+      "desc": "Description",
+      "submit": "Update",
+      "success": "Update Successful",
+      "successDesc": "Refrigerator information has been updated",
+      "error": "Update Failed",
+      "errorDesc": "An error occurred while updating the refrigerator"
+    }
+  },
+  "recipe": {
+    "generator": {
+      "title": "AI Recipe Generator",
+      "placeholder": "Enter recipe details freely. Example) How to make kimchi stew with pork",
+      "button": "Generate Recipe with AI",
+      "loading": "AI is generating recipe...",
+      "success": "Recipe Created",
+      "successDesc": "A new recipe has been successfully generated.",
+      "error": "Error",
+      "errorDesc": "An error occurred while generating the recipe."
+    }
+  }
+} 

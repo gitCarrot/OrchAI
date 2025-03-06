@@ -1,0 +1,2 @@
+CREATE INDEX "refrigerator_categories_refrigerator_id_idx" ON "refrigerator_categories" USING btree ("refrigerator_id");--> statement-breakpoint
+CREATE INDEX "refrigerator_categories_category_id_idx" ON "refrigerator_categories" USING btree ("category_id");

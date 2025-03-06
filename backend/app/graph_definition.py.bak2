@@ -1,0 +1,362 @@
+from typing import Dict, Any, List, Optional, Literal, Tuple, Annotated, Callable, Union, Type
+from datetime import datetime
+
+from pydantic import BaseModel, Field
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, StateGraph, START
+from langgraph.prebuilt import tools_condition, ToolNode
+from langgraph.types import Command
+from langgraph.graph.message import AnyMessage, add_messages
+
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import Runnable, RunnableConfig, RunnableLambda
+from langchain_openai import ChatOpenAI
+
+# 컨텍스트 툴, 레시피 툴, 냉장고 툴 (예시)
+from .tools.context import fetch_context
+from .tools.recipes import get_all_recipes, safe_tools as recipe_safe_tools, sensitive_tools as recipe_sensitive_tools
+from .tools.refrigerators import safe_tools as refrigerator_safe_tools, sensitive_tools as refrigerator_sensitive_tools
+
+# 서브 어시스턴트 관련 모듈 임포트
+from .assistants.config import SubAssistantConfig, SUB_ASSISTANTS
+from .assistants.transition_tools import ToRecipeAssistant, ToRefrigeratorAssistant, CompleteOrEscalate
+from .assistants.helpers import (
+    update_dialog_stack,
+    create_tool_node_with_fallback,
+    create_entry_node,
+    pop_dialog_state,
+    create_sub_assistant,
+    update_state_dialog_state_type
+)
+
+from typing_extensions import TypedDict
+
+llm = ChatOpenAI(model="gpt-4o-mini")
+
+def update_dialog_stack(left: list[str], right: Optional[str]) -> list[str]:
+    """dialog_state 스택 push/pop 헬퍼"""
+    if right is None:
+        return left
+    if right == "pop":
+        return left[:-1]
+    return left + [right]
+
+# 서브 어시스턴트 설정을 위한 클래스
+class SubAssistantConfig:
+    """서브 어시스턴트 설정 클래스"""
+    def __init__(
+        self,
+        name: str,  # 어시스턴트 이름 (예: "레시피 어시스턴트")
+        id: str,    # 어시스턴트 ID (예: "recipe")
+        system_prompt: str,  # 시스템 프롬프트
+        safe_tools: List,    # 안전한 도구 목록
+        sensitive_tools: List,  # 민감한 도구 목록
+        transition_tool: Type[BaseModel]  # 전환 도구 클래스 (예: ToRecipeAssistant)
+    ):
+        self.name = name
+        self.id = id
+        self.system_prompt = system_prompt
+        self.safe_tools = safe_tools
+        self.sensitive_tools = sensitive_tools
+        self.transition_tool = transition_tool
+
+# 서브 어시스턴트 전환 도구 클래스들
+class ToRecipeAssistant(BaseModel):
+    """레시피 어시스턴트로 전환"""
+    recipe_id: int = None
+    request: str = Field(...)
+
+class ToRefrigeratorAssistant(BaseModel):
+    """냉장고 어시스턴트로 전환"""
+    refrigerator_id: int = None
+    request: str = Field(...)
+
+# State 클래스 정의 (전역)
+class State(TypedDict):
+    messages: Annotated[list[AnyMessage], add_messages]
+    context_info: str
+    dialog_state: Annotated[
+        list[Literal["primary", "recipe", "refrigerator"]],
+        update_dialog_stack,
+    ]
+
+class CompleteOrEscalate(BaseModel):
+    """작업 완료하거나 상위로 돌아가는 특수 도구"""
+    cancel: bool = True
+    reason: str
+
+class Assistant:
+    """LLM 응답 실행 래퍼"""
+    def __init__(self, runnable: Runnable):
+        self.runnable = runnable
+
+    def __call__(self, state: Dict, config: RunnableConfig):
+        messages = state.get("messages", [])
+        response = self.runnable.invoke({"messages": messages}, config)
+        return {"messages": messages + [response]}
+
+def handle_tool_error(state):
+    error = state.get("error")
+    tool_calls = state["messages"][-1].tool_calls
+    # Generate a single "ToolMessage" telling there's an error
+    return {
+        "messages": [
+            ToolMessage(
+                name=tool_calls[0]["name"],  # e.g., create_recipe
+                content=f"오류 발생: {error}",
+                tool_call_id=tool_calls[0]["id"],
+            )
+        ]
+    }
+
+def create_tool_node_with_fallback(tools: list) -> dict:
+    """
+    Wrap the given list of tools with fallback for error handling.
+    """
+    return ToolNode(tools).with_fallbacks(
+        [RunnableLambda(handle_tool_error)],
+        exception_key="error"
+    )
+
+def create_entry_node(assistant_name: str, new_dialog_state: str):
+    """
+    예: ToRecipeAssistant → "레시피 어시스턴트로 전환"
+    """
+    def entry_node(state: Dict) -> dict:
+        from langchain_core.messages import ToolMessage
+        tool_call_id = state["messages"][-1].tool_calls[0]["id"]
+        return {
+            "messages": [
+                ToolMessage(
+                    content=(
+                        f"The assistant is now the {assistant_name}. "
+                        "Use the provided tools to help the user. "
+                        "IMPORTANT: Only call ONE tool at a time. "
+                        "If the user changes their mind or you finish your task, call CompleteOrEscalate to return."
+                    ),
+                    tool_call_id=tool_call_id,
+                )
+            ],
+            "dialog_state": new_dialog_state,
+        }
+    return entry_node
+
+def pop_dialog_state(state: Dict) -> dict:
+    """CompleteOrEscalate 후 메인 어시스턴트로 복귀."""
+    from langchain_core.messages import ToolMessage
+    messages = []
+    if state["messages"][-1].tool_calls:
+        messages.append(
+            ToolMessage(
+                content="Resuming dialog with the main assistant.",
+                tool_call_id=state["messages"][-1].tool_calls[0]["id"],
+            )
+        )
+    return {"dialog_state": "pop", "messages": messages}
+
+def create_sub_assistant(
+    builder: StateGraph,
+    config: SubAssistantConfig
+) -> None:
+    """서브 어시스턴트 노드와 엣지를 생성하는 함수"""
+    
+    # 1. 어시스턴트 프롬프트 생성
+    assistant_prompt = ChatPromptTemplate.from_messages([
+        (
+            "system",
+            config.system_prompt
+        ),
+        ("placeholder", "{messages}")
+    ]).partial(time=datetime.now)
+
+    # 2. 어시스턴트 실행기 생성
+    assistant_runnable = assistant_prompt | llm.bind_tools(
+        config.safe_tools + config.sensitive_tools + [CompleteOrEscalate]
+    )
+    
+    # 3. 노드 생성
+    # 3.1 진입 노드
+    builder.add_node(f"enter_{config.id}", create_entry_node(config.name, config.id))
+    # 3.2 어시스턴트 노드
+    builder.add_node(config.id, Assistant(assistant_runnable))
+    # 3.3 도구 노드
+    builder.add_node(f"{config.id}_safe_tools", create_tool_node_with_fallback(config.safe_tools))
+    builder.add_node(f"{config.id}_sensitive_tools", create_tool_node_with_fallback(config.sensitive_tools))
+    
+    # 4. 엣지 연결
+    # 4.1 진입 노드 -> 어시스턴트 노드
+    builder.add_edge(f"enter_{config.id}", config.id)
+    
+    # 4.2 어시스턴트 노드 -> 도구 노드 또는 종료 노드 (조건부)
+    def route_assistant(state: Dict):
+        route = tools_condition(state)
+        if route == END:
+            return END
+        tool_calls = state["messages"][-1].tool_calls
+        if any(tc["name"] == CompleteOrEscalate.__name__ for tc in tool_calls):
+            return "leave_skill"
+        safe_toolnames = [t.name for t in config.safe_tools]
+        if all(tc["name"] in safe_toolnames for tc in tool_calls):
+            return f"{config.id}_safe_tools"
+        return f"{config.id}_sensitive_tools"
+    
+    builder.add_conditional_edges(
+        config.id,
+        route_assistant,
+        [f"{config.id}_safe_tools", f"{config.id}_sensitive_tools", "leave_skill", END],
+    )
+    
+    # 4.3 도구 노드 -> 어시스턴트 노드
+    builder.add_edge(f"{config.id}_safe_tools", config.id)
+    builder.add_edge(f"{config.id}_sensitive_tools", config.id)
+
+# State 클래스의 dialog_state 타입을 동적으로 업데이트하는 함수
+def update_state_dialog_state_type():
+    """서브 어시스턴트 ID를 기반으로 State 클래스의 dialog_state 타입을 동적으로 업데이트"""
+    assistant_ids = ["primary"] + [config.id for config in SUB_ASSISTANTS]
+    # 여기서는 State 클래스를 직접 수정하지 않고, 새로운 StateGraph 인스턴스를 생성할 때 사용할 타입을 반환
+    return Literal[tuple(assistant_ids)]  # type: ignore
+
+def build_graph() -> StateGraph:
+    """그래프를 구축합니다."""
+    
+    # 레시피 어시스턴트 설정
+    recipe_system_prompt = """You are a Recipe Assistant specialized in helping users with recipes.
+
+Key Responsibilities:
+1. Help users find recipes
+2. Provide recipe details
+3. Create new recipes
+4. Update existing recipes
+5. Delete recipes
+6. Share recipes with others
+7. Manage favorite recipes
+
+Important Rules:
+1. Call only ONE tool at a time.
+2. If user changes request or you finish your task, call CompleteOrEscalate to return to the main assistant.
+3. The user should not be aware that you are a specialized assistant. Respond as if you are the main assistant.
+4. Always use Korean language unless explicitly asked to use another language.
+
+Now handle the conversation based on the user's messages below."""
+
+    # 냉장고 어시스턴트 설정
+    refrigerator_system_prompt = """You are a Refrigerator Assistant specialized in helping users manage their refrigerators.
+
+Key Responsibilities:
+1. Help users view their refrigerators
+2. Manage refrigerator categories
+3. Add, update, and delete ingredients
+4. Share refrigerators with others
+5. Get refrigerator details
+
+Important Rules:
+1. Call only ONE tool at a time.
+2. If user changes request or you finish your task, call CompleteOrEscalate to return to the main assistant.
+3. The user should not be aware that you are a specialized assistant. Respond as if you are the main assistant.
+4. Always use Korean language unless explicitly asked to use another language.
+
+Now handle the conversation based on the user's messages below."""
+
+    # 서브 어시스턴트 설정 생성
+    recipe_assistant_config = SubAssistantConfig(
+        name="레시피 어시스턴트",
+        id="recipe",
+        system_prompt=recipe_system_prompt,
+        safe_tools=recipe_safe_tools,
+        sensitive_tools=recipe_sensitive_tools,
+        transition_tool=ToRecipeAssistant
+    )
+    
+    refrigerator_assistant_config = SubAssistantConfig(
+        name="냉장고 어시스턴트",
+        id="refrigerator",
+        system_prompt=refrigerator_system_prompt,
+        safe_tools=refrigerator_safe_tools,
+        sensitive_tools=refrigerator_sensitive_tools,
+        transition_tool=ToRefrigeratorAssistant
+    )
+    
+    # 서브 어시스턴트 목록에 추가
+    SUB_ASSISTANTS.extend([recipe_assistant_config, refrigerator_assistant_config])
+    
+    # 그래프 빌더 초기화
+    builder = StateGraph(State)
+    
+    # 메인 어시스턴트 설정
+    main_system_prompt = """You are HIRecipi, a helpful AI assistant specialized in recipes and refrigerator management.
+
+Your primary responsibilities:
+1. Help users find and manage recipes
+2. Assist with refrigerator management
+3. Provide cooking advice and tips
+
+When users ask about recipes, use the ToRecipeAssistant tool.
+When users ask about refrigerators, use the ToRefrigeratorAssistant tool.
+
+Always be helpful, concise, and friendly. Use Korean language by default unless asked to use another language."""
+
+    main_prompt = ChatPromptTemplate.from_messages([
+        ("system", main_system_prompt),
+        ("placeholder", "{messages}"),
+    ])
+    
+    main_runnable = main_prompt | llm
+    
+    # 노드 추가
+    builder.add_node("primary_assistant", Assistant(main_runnable))
+    builder.add_node("context", RunnableLambda(lambda state: {
+        "context_info": fetch_context(state.get("messages", [])[-1].content if state.get("messages") else ""),
+        "messages": state.get("messages", [])
+    }))
+    
+    # 라우팅 함수 정의
+    def route_to_workflow(state: Dict):
+        """메인 어시스턴트에서 워크플로우로 라우팅"""
+        messages = state.get("messages", [])
+        last_message = messages[-1] if messages else None
+        
+        if not hasattr(last_message, "tool_calls") or not last_message.tool_calls:
+            return None
+        
+        # 도구 호출 확인
+        for tool_call in last_message.tool_calls:
+            tool_name = tool_call.get("name")
+            
+            # 서브 어시스턴트 전환 도구 확인
+            for assistant in SUB_ASSISTANTS:
+                if tool_name == assistant.transition_tool.__name__:
+                    return f"{assistant.id}_entry"
+        
+        return None
+    
+    # 서브 어시스턴트 노드 및 엣지 생성
+    for assistant_config in SUB_ASSISTANTS:
+        create_sub_assistant(builder, assistant_config)
+    
+    # 메인 어시스턴트 라우팅 함수
+    def route_primary_assistant(state: Dict):
+        """메인 어시스턴트 라우팅"""
+        dialog_state = state.get("dialog_state", [])
+        
+        # 대화 상태가 비어있으면 컨텍스트 노드로 이동
+        if not dialog_state:
+            return "context"
+        
+        # 마지막 대화 상태가 primary가 아니면 해당 어시스턴트로 이동
+        last_state = dialog_state[-1] if dialog_state else "primary"
+        if last_state != "primary":
+            for assistant in SUB_ASSISTANTS:
+                if last_state == assistant.id:
+                    return f"{assistant.id}_assistant"
+        
+        return "primary_assistant"
+    
+    # 엣지 추가
+    builder.add_conditional_edges(START, route_primary_assistant)
+    builder.add_conditional_edges("primary_assistant", route_to_workflow)
+    builder.add_edge("context", "primary_assistant")
+    
+    # 그래프 컴파일 및 반환
+    return builder.compile()

@@ -1,0 +1,48 @@
+{
+  "common": {
+    "edit": "Edit",
+    "editing": "Editing...",
+    "cancel": "Cancel",
+    "error": "An error occurred",
+    "loading": "Loading...",
+    "units": {
+      "g": "g",
+      "kg": "kg",
+      "ml": "ml",
+      "l": "l",
+      "ea": "ea",
+      "pack": "pack",
+      "box": "box",
+      "bottle": "bottle"
+    }
+  },
+  "recipe": {
+    "loading": {
+      "generating": "AI is generating recipe...",
+      "translating": "Converting recipe to multiple languages...",
+      "saving": "Saving generated recipe..."
+    },
+    "generator": {
+      "multilingualTitle": "AI Recipe Generator",
+      "multilingualPlaceholder": "Enter the dish or ingredients you want to cook...",
+      "multilingualButton": "Generate Recipe",
+      "error": "Recipe Generation Failed",
+      "errorDesc": "An error occurred while generating the recipe. Please try again.",
+      "success": "Recipe Generated",
+      "successDesc": "Recipe has been successfully generated."
+    },
+    "error": {
+      "search": "An error occurred while searching for recipes.",
+      "favorite": "An error occurred while updating favorites."
+    },
+    "typeAI": "AI Generated",
+    "typeCustom": "User Created",
+    "noTitle": "No Title",
+    "favorited": "Added to Favorites",
+    "favoritedDesc": "Recipe has been added to favorites.",
+    "unfavorited": "Removed from Favorites",
+    "unfavoritedDesc": "Recipe has been removed from favorites.",
+    "deleted": "Recipe Deleted",
+    "deletedDesc": "Recipe has been successfully deleted."
+  }
+} 

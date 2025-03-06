@@ -1,0 +1,102 @@
+{
+  "common": {
+    "error": "エラーが発生しました",
+    "loading": "読み込み中...",
+    "userNotFound": "ユーザーが見つかりません",
+    "all": "すべて",
+    "unknownError": "不明なエラーが発生しました"
+  },
+  "refrigerator": {
+    "loadError": "データの読み込みに失敗しました",
+    "addIngredient": "食材を追加",
+    "addIngredientDesc": "冷蔵庫に新しい食材を追加します",
+    "share": {
+      "title": "冷蔵庫を共有",
+      "description": "メールアドレスを入力して他のユーザーと冷蔵庫を共有します",
+      "emailLabel": "メールアドレス",
+      "emailPlaceholder": "ユーザーのメール",
+      "roleLabel": "権限",
+      "selectRole": "権限を選択",
+      "roleViewer": "閲覧者（閲覧のみ）",
+      "roleAdmin": "管理者（編集可能）",
+      "submit": "共有する",
+      "success": "共有完了",
+      "successDesc": "ユーザーと冷蔵庫を共有しました",
+      "error": "共有失敗",
+      "errorDesc": "冷蔵庫の共有に失敗しました",
+      "alreadyShared": "すでに共有されているユーザーです"
+    },
+    "category": {
+      "title": "カテゴリー管理",
+      "manageDescription": "冷蔵庫の食材カテゴリーを管理できます",
+      "add": "カテゴリーを追加",
+      "edit": "カテゴリーを編集",
+      "delete": "カテゴリーを削除",
+      "success": "カテゴリーを更新しました",
+      "error": "カテゴリーの更新に失敗しました"
+    },
+    "invitations": {
+      "title": "冷蔵庫の招待管理",
+      "description": "受信した招待と送信した招待を管理します",
+      "receivedTab": "受信した招待",
+      "sentTab": "送信した招待",
+      "noReceived": "受信した招待はありません",
+      "noReceivedDesc": "まだ招待を受信していません",
+      "noSent": "送信した招待はありません",
+      "noSentDesc": "まだ招待を送信していません",
+      "from": "送信者：",
+      "to": "受信者：",
+      "invitedOn": "招待日：",
+      "role": "権限",
+      "accept": "承認",
+      "reject": "拒否",
+      "cancel": "招待をキャンセル",
+      "statusPending": "保留中",
+      "statusAccepted": "承認済み",
+      "statusRejected": "拒否済み",
+      "loadError": "招待の読み込み中にエラーが発生しました",
+      "processError": "招待の処理中にエラーが発生しました",
+      "acceptSuccess": "招待を承認しました",
+      "acceptSuccessDesc": "冷蔵庫にアクセスできるようになりました",
+      "rejectSuccess": "招待を拒否しました",
+      "rejectSuccessDesc": "招待を拒否しました",
+      "cancelSuccess": "招待をキャンセルしました",
+      "cancelSuccessDesc": "招待がキャンセルされました",
+      "cancelError": "招待のキャンセル中にエラーが発生しました"
+    },
+    "members": {
+      "title": "共有メンバー管理",
+      "description": "冷蔵庫を共有しているメンバーを管理します",
+      "noMembers": "共有メンバーがいません",
+      "email": "メール",
+      "remove": "削除",
+      "removeSuccess": "メンバー削除完了",
+      "removeSuccessDesc": "メンバーが削除されました",
+      "removeError": "削除失敗",
+      "removeErrorDesc": "メンバーの削除中にエラーが発生しました"
+    },
+    "edit": {
+      "title": "冷蔵庫を編集",
+      "description": "冷蔵庫の情報を編集します",
+      "name": "名前",
+      "desc": "説明",
+      "submit": "更新",
+      "success": "更新完了",
+      "successDesc": "冷蔵庫の情報が更新されました",
+      "error": "更新失敗",
+      "errorDesc": "冷蔵庫の更新中にエラーが発生しました"
+    }
+  },
+  "recipe": {
+    "generator": {
+      "title": "AIレシピ生成",
+      "placeholder": "レシピの内容を自由に入力してください。例）豚肉キムチ鍋の作り方を教えて",
+      "button": "AIでレシピを生成",
+      "loading": "AIがレシピを生成中...",
+      "success": "レシピが生成されました",
+      "successDesc": "新しいレシピが正常に生成されました。",
+      "error": "エラー",
+      "errorDesc": "レシピの生成中にエラーが発生しました。"
+    }
+  }
+} 
